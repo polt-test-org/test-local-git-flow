@@ -1,0 +1,228 @@
+{
+  "servers": {
+    "sap-s4-cadunning": {
+      "mcp_server_name": "sap.mcp/sap_self",
+      "description": "MCP server for SAP S/4HANA Contract Accounting Dunning (CADUNNING_0001)",
+      "tools": {
+        "list_cadunning_for_sap_self": {
+          "description": "Retrieve a list of entities from the CADunning collection. Supports $filter, $select, $orderby, $top, $skip, $expand, $count.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "filter": { "type": "string", "description": "OData $filter expression" },
+              "select": { "type": "string", "description": "Comma-separated properties to return" },
+              "orderby": { "type": "string", "description": "Sort order" },
+              "top": { "type": "integer", "description": "Max number of results" },
+              "skip": { "type": "integer", "description": "Number of results to skip" },
+              "expand": { "type": "string", "description": "Navigation properties to expand" },
+              "count": { "type": "boolean", "description": "Include count in response" }
+            },
+            "required": []
+          },
+          "mock_response": {
+            "value": [
+              {
+                "CAMassRunDate": "2026-07-01",
+                "CAMassRunID": "RUN01",
+                "BusinessPartner": "BP001",
+                "ContractAccount": "CA0000001001",
+                "CADunningCounter": "000001",
+                "CADunningProcedure": "Z1",
+                "CADunningLevel": "02",
+                "CADunningLevelCategory": "ST",
+                "TransactionCurrency": "USD",
+                "CADunningBalance": "5200.00",
+                "CANextDunningDate": "2026-08-01",
+                "CAIssueDate": "2026-07-01",
+                "DunningIssueDate": "2026-07-01",
+                "CADunningActivityRunDate": "2026-07-01",
+                "CAPaymentTargetDate": "2026-07-15",
+                "CADunningNoticeIsReversed": false,
+                "CADunningNoticeIsInfoOnly": false,
+                "CAIsSubmittedToCollAgency": false,
+                "CASuccessPercentage": "0.00"
+              },
+              {
+                "CAMassRunDate": "2026-07-01",
+                "CAMassRunID": "RUN01",
+                "BusinessPartner": "BP002",
+                "ContractAccount": "CA0000001002",
+                "CADunningCounter": "000002",
+                "CADunningProcedure": "Z1",
+                "CADunningLevel": "03",
+                "CADunningLevelCategory": "ST",
+                "TransactionCurrency": "EUR",
+                "CADunningBalance": "12800.00",
+                "CANextDunningDate": "2026-08-01",
+                "CAIssueDate": "2026-07-01",
+                "DunningIssueDate": "2026-07-01",
+                "CADunningActivityRunDate": "2026-07-01",
+                "CAPaymentTargetDate": "2026-07-10",
+                "CADunningNoticeIsReversed": false,
+                "CADunningNoticeIsInfoOnly": false,
+                "CAIsSubmittedToCollAgency": false,
+                "CASuccessPercentage": "0.00"
+              }
+            ]
+          }
+        },
+        "get_cadunning_for_sap_self": {
+          "description": "Retrieve a single CADunning entity by key.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "camassrundate": { "type": "string", "description": "Mass run date (YYYY-MM-DD)" },
+              "camassrunid": { "type": "string", "description": "Mass run ID" },
+              "businesspartner": { "type": "string", "description": "Business partner number" },
+              "contractaccount": { "type": "string", "description": "Contract account number" },
+              "cadunningcounter": { "type": "string", "description": "Dunning counter" },
+              "select": { "type": "string", "description": "Properties to select" },
+              "expand": { "type": "string", "description": "Navigation properties to expand" }
+            },
+            "required": ["camassrundate", "camassrunid", "businesspartner", "contractaccount", "cadunningcounter"]
+          },
+          "mock_response": {
+            "CAMassRunDate": "2026-07-01",
+            "CAMassRunID": "RUN01",
+            "BusinessPartner": "BP001",
+            "ContractAccount": "CA0000001001",
+            "CADunningCounter": "000001",
+            "CADunningProcedure": "Z1",
+            "CADunningLevel": "02",
+            "TransactionCurrency": "USD",
+            "CADunningBalance": "5200.00",
+            "CAPaymentTargetDate": "2026-07-15",
+            "CADunningNoticeIsReversed": false
+          }
+        },
+        "list_cadunningitem_for_sap_self": {
+          "description": "Retrieve a list of entities from the CADunningItem collection.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "filter": { "type": "string", "description": "OData $filter expression" },
+              "select": { "type": "string", "description": "Properties to return" },
+              "orderby": { "type": "string", "description": "Sort order" },
+              "top": { "type": "integer", "description": "Max number of results" },
+              "skip": { "type": "integer", "description": "Results to skip" },
+              "expand": { "type": "string", "description": "Navigation properties to expand" },
+              "count": { "type": "boolean", "description": "Include count" }
+            },
+            "required": []
+          },
+          "mock_response": {
+            "value": [
+              {
+                "CAMassRunDate": "2026-07-01",
+                "CAMassRunID": "RUN01",
+                "BusinessPartner": "BP001",
+                "ContractAccount": "CA0000001001",
+                "CADunningCounter": "000001",
+                "CADocumentNumber": "DOC0001001",
+                "CARepetitionItemNumber": "001",
+                "CABPItemNumber": "0001",
+                "CASubItemNumber": "000",
+                "CompanyCode": "1000",
+                "CAContract": "CONTRACT001",
+                "TransactionCurrency": "USD",
+                "CADunningAmount": "5200.00",
+                "CADunningInterestAmount": "0.00",
+                "CANetDueDate": "2026-06-01",
+                "CADunningActivityRunDate": "2026-07-01",
+                "CAIssueDate": "2026-05-15",
+                "CADunningLevel": "02",
+                "CADunningLevelCategory": "ST",
+                "CANextDunningLevel": "03",
+                "CADunningNoticeIsReversed": false,
+                "CADunningNoticeIsInfoOnly": false,
+                "CADunningProcedure": "Z1"
+              }
+            ]
+          }
+        },
+        "get_cadunningitem_for_sap_self": {
+          "description": "Retrieve a single CADunningItem entity by key.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "camassrundate": { "type": "string" },
+              "camassrunid": { "type": "string" },
+              "businesspartner": { "type": "string" },
+              "contractaccount": { "type": "string" },
+              "cadunningcounter": { "type": "string" },
+              "cadocumentnumber": { "type": "string" },
+              "carepetitionitemnumber": { "type": "string" },
+              "cabpitemnumber": { "type": "string" },
+              "casubitemnumber": { "type": "string" },
+              "select": { "type": "string" },
+              "expand": { "type": "string" }
+            },
+            "required": ["camassrundate", "camassrunid", "businesspartner", "contractaccount", "cadunningcounter", "cadocumentnumber", "carepetitionitemnumber", "cabpitemnumber", "casubitemnumber"]
+          },
+          "mock_response": {
+            "CAMassRunDate": "2026-07-01",
+            "CAMassRunID": "RUN01",
+            "BusinessPartner": "BP001",
+            "ContractAccount": "CA0000001001",
+            "CADunningCounter": "000001",
+            "CADocumentNumber": "DOC0001001",
+            "TransactionCurrency": "USD",
+            "CADunningAmount": "5200.00",
+            "CANetDueDate": "2026-06-01",
+            "CADunningLevel": "02"
+          }
+        },
+        "list__dunitem_in_cadunning_for_sap_self": {
+          "description": "Navigate from CADunning to related CADunningItem entities via the _DunItem navigation property.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "camassrundate": { "type": "string" },
+              "camassrunid": { "type": "string" },
+              "businesspartner": { "type": "string" },
+              "contractaccount": { "type": "string" },
+              "cadunningcounter": { "type": "string" },
+              "filter": { "type": "string" },
+              "top": { "type": "integer" },
+              "skip": { "type": "integer" }
+            },
+            "required": ["camassrundate", "camassrunid", "businesspartner", "contractaccount", "cadunningcounter"]
+          },
+          "mock_response": {
+            "value": [
+              {
+                "CADocumentNumber": "DOC0001001",
+                "CANetDueDate": "2026-06-01",
+                "CADunningAmount": "5200.00",
+                "TransactionCurrency": "USD",
+                "CADunningLevel": "02",
+                "BusinessPartner": "BP001"
+              }
+            ]
+          }
+        },
+        "get_metadata_sap_self": {
+          "description": "Get metadata of the OData service.",
+          "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "mock_response": {
+            "metadata": "<?xml version=\"1.0\"?><edmx:Edmx Version=\"4.0\"><edmx:DataServices><Schema Namespace=\"com.sap.gateway.srvd_a2x.api_cadunning.v0001\"></Schema></edmx:DataServices></edmx:Edmx>"
+          }
+        }
+      }
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "created_for_agent": "collection-email-agent",
+    "mock_mode": true,
+    "deterministic": true,
+    "total_servers": 1,
+    "total_tools": 6,
+    "generated_from": ["translation.json"],
+    "generation_date": "2026-07-23"
+  }
+}

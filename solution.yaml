@@ -1,0 +1,12 @@
+apiVersion: solution.sap/v1
+kind: Solution
+
+metadata:
+  name: collection-email-agent-94c1e
+  version: 1.0.0
+  description: "AI agent that drafts personalized collection emails from S/4HANA dunning data, with specialist review and manager escalation via n8n workflow"
+
+assets:
+  - ref: ./assets/collection-email-agent/asset.yaml
+  - ref: ./assets/n8n/asset.yaml
+  - ref: ./assets/sap-s4-cadunning-mcp-server/asset.yaml

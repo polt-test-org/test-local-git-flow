@@ -1,0 +1,135 @@
+{
+  "mcpTranslationVersion": "0.1",
+  "target": {
+    "ordId": "sap.s4:apiResource:CADUNNING_0001:v1",
+    "type": "edmx"
+  },
+  "serverInfo": {
+    "name": "sap.mcp/sap_self",
+    "title": "sap_self",
+    "version": "1.0.0",
+    "description": "MCP server for the sap_self service."
+  },
+  "tools": [
+    {
+      "name": "get_metadata_sap_self",
+      "title": "get_metadata_sap_self",
+      "description": "Get metadata of the OData service with optional filtering to reduce token consumption.",
+      "odataType": { "metadataRequest": {} }
+    },
+    {
+      "name": "list_cadunning_for_sap_self",
+      "title": "list_CADunning_for_sap_self",
+      "description": "Retrieve a list of entities from the CADunning collection. Supports $filter, $select, $orderby, $top, $skip, $expand, $count.",
+      "odataType": {
+        "entitySet": {
+          "name": "CADunning",
+          "crudOperation": "read",
+          "parameters": [
+            { "name": "filter" },
+            { "name": "select" },
+            { "name": "orderby" },
+            { "name": "top" },
+            { "name": "skip" },
+            { "name": "expand" },
+            { "name": "count" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "get_cadunning_for_sap_self",
+      "title": "get_CADunning_for_sap_self",
+      "description": "Retrieve a single CADunning entity by key. Supports $select and $expand.",
+      "odataType": {
+        "entitySet": {
+          "name": "CADunning",
+          "crudOperation": "readByKey",
+          "parameters": [
+            { "name": "CAMassRunDate", "newParameterName": "camassrundate" },
+            { "name": "CAMassRunID", "newParameterName": "camassrunid" },
+            { "name": "BusinessPartner", "newParameterName": "businesspartner" },
+            { "name": "ContractAccount", "newParameterName": "contractaccount" },
+            { "name": "CADunningCounter", "newParameterName": "cadunningcounter" },
+            { "name": "select" },
+            { "name": "expand" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "list_cadunningitem_for_sap_self",
+      "title": "list_CADunningItem_for_sap_self",
+      "description": "Retrieve a list of entities from the CADunningItem collection. Supports $filter, $select, $orderby, $top, $skip, $expand, $count.",
+      "odataType": {
+        "entitySet": {
+          "name": "CADunningItem",
+          "crudOperation": "read",
+          "parameters": [
+            { "name": "filter" },
+            { "name": "select" },
+            { "name": "orderby" },
+            { "name": "top" },
+            { "name": "skip" },
+            { "name": "expand" },
+            { "name": "count" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "get_cadunningitem_for_sap_self",
+      "title": "get_CADunningItem_for_sap_self",
+      "description": "Retrieve a single CADunningItem entity by key. Supports $select and $expand.",
+      "odataType": {
+        "entitySet": {
+          "name": "CADunningItem",
+          "crudOperation": "readByKey",
+          "parameters": [
+            { "name": "CAMassRunDate", "newParameterName": "camassrundate" },
+            { "name": "CAMassRunID", "newParameterName": "camassrunid" },
+            { "name": "BusinessPartner", "newParameterName": "businesspartner" },
+            { "name": "ContractAccount", "newParameterName": "contractaccount" },
+            { "name": "CADunningCounter", "newParameterName": "cadunningcounter" },
+            { "name": "CADocumentNumber", "newParameterName": "cadocumentnumber" },
+            { "name": "CARepetitionItemNumber", "newParameterName": "carepetitionitemnumber" },
+            { "name": "CABPItemNumber", "newParameterName": "cabpitemnumber" },
+            { "name": "CASubItemNumber", "newParameterName": "casubitemnumber" },
+            { "name": "select" },
+            { "name": "expand" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "list__dunitem_in_cadunning_for_sap_self",
+      "title": "list__DunItem_in_CADunning_for_sap_self",
+      "description": "Navigate from CADunning to related CADunningItem entities via the _DunItem navigation property.",
+      "odataType": {
+        "entitySet": {
+          "name": "CADunning",
+          "navigationProperty": {
+            "name": "_DunItem",
+            "crudOperation": "read",
+            "parameters": [
+              { "name": "filter" },
+              { "name": "select" },
+              { "name": "orderby" },
+              { "name": "top" },
+              { "name": "skip" },
+              { "name": "expand" },
+              { "name": "count" }
+            ]
+          },
+          "parameters": [
+            { "name": "CAMassRunDate", "newParameterName": "camassrundate" },
+            { "name": "CAMassRunID", "newParameterName": "camassrunid" },
+            { "name": "BusinessPartner", "newParameterName": "businesspartner" },
+            { "name": "ContractAccount", "newParameterName": "contractaccount" },
+            { "name": "CADunningCounter", "newParameterName": "cadunningcounter" }
+          ]
+        }
+      }
+    }
+  ]
+}

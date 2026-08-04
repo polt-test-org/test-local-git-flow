@@ -1,0 +1,10 @@
+apiVersion: asset.sap/v1
+kind: Asset
+
+type: mcp-server
+
+metadata:
+  name: sap-s4-cadunning-mcp-server
+  ordId: customer.build:apiResource:collection-email-agent-94c1e.sap-s4-cadunning-mcp-server:v1
+  version: "1.0.0"
+  translation: mcp-translation/translation.json

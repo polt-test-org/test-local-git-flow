@@ -1,0 +1,468 @@
+{
+  "name": "Collection Email Orchestration",
+  "description": "Orchestrates the collection email process: fetches overdue dunning accounts from SAP S/4HANA, invokes the AI Agent to draft personalized collection emails per customer, presents drafts for specialist review, dispatches approved emails, tracks collection attempts, and escalates to a manager after a configurable number of failed attempts.",
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [0, 0],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fetch-overdue-invoices",
+      "name": "Fetch Overdue Dunning Records",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [220, 0],
+      "parameters": {
+        "method": "GET",
+        "url": "https://your-s4hana-system.com/sap/opu/odata4/sap/api_cadunning/srvd_a2x/sap/api_cadunning/0001/CADunning",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "$filter",
+              "value": "CADunningNoticeIsReversed eq false"
+            },
+            {
+              "name": "$top",
+              "value": "100"
+            },
+            {
+              "name": "$expand",
+              "value": "_DunItem"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "extract-records",
+      "name": "Extract Dunning Records",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [440, 0],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "name": "dunningRecords",
+              "value": "={{ $json.value }}",
+              "type": "array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "split-per-customer",
+      "name": "Process Each Customer",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [660, 0],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "invoke-collection-agent",
+      "name": "Invoke Collection Email Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [880, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "https://agent.company.com/api",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"query\": \"Draft collection email for BusinessPartner {{ $json.BusinessPartner }} with dunning balance {{ $json.CADunningBalance }} {{ $json.TransactionCurrency }}, dunning level {{ $json.CADunningLevel }}, payment target date {{ $json.CAPaymentTargetDate }}\",\n  \"context_id\": \"{{ $json.BusinessPartner }}-{{ $json.CADunningCounter }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "prepare-review-data",
+      "name": "Prepare Review Notification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1100, 0],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "name": "businessPartner",
+              "value": "={{ $('Process Each Customer').item.json.BusinessPartner }}",
+              "type": "string"
+            },
+            {
+              "name": "dunningBalance",
+              "value": "={{ $('Process Each Customer').item.json.CADunningBalance }}",
+              "type": "string"
+            },
+            {
+              "name": "currency",
+              "value": "={{ $('Process Each Customer').item.json.TransactionCurrency }}",
+              "type": "string"
+            },
+            {
+              "name": "dunningLevel",
+              "value": "={{ $('Process Each Customer').item.json.CADunningLevel }}",
+              "type": "string"
+            },
+            {
+              "name": "draftEmail",
+              "value": "={{ $('Invoke Collection Email Agent').item.json.result || $('Invoke Collection Email Agent').item.json.message || $('Invoke Collection Email Agent').item.json.content }}",
+              "type": "string"
+            },
+            {
+              "name": "collectionAttemptCount",
+              "value": "={{ ($('Process Each Customer').item.json.collectionAttemptCount || 0) }}",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wait-for-review",
+      "name": "Wait for Specialist Review",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1320, 0],
+      "parameters": {
+        "resume": "webhook",
+        "webhookSuffix": "6428aa34-ba0c-46c9-a437-2f829d9ca916"
+      }
+    },
+    {
+      "id": "send-review-notification",
+      "name": "Notify Specialist of Draft",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1100, -200],
+      "parameters": {
+        "fromEmail": "ar-system@company.com",
+        "toEmail": "collections-team@company.com",
+        "subject": "=[Action Required] Collection Email Draft — {{ $('Prepare Review Notification').item.json.businessPartner }}",
+        "emailType": "html",
+        "message": "=<p>A collection email draft is ready for your review.</p><p><strong>Business Partner:</strong> {{ $('Prepare Review Notification').item.json.businessPartner }}<br><strong>Dunning Balance:</strong> {{ $('Prepare Review Notification').item.json.dunningBalance }} {{ $('Prepare Review Notification').item.json.currency }}<br><strong>Dunning Level:</strong> {{ $('Prepare Review Notification').item.json.dunningLevel }}</p><h3>Drafted Email:</h3><pre>{{ $('Prepare Review Notification').item.json.draftEmail }}</pre><p>Please review and respond: <strong>Approve</strong> or <strong>Discard</strong></p><p>Click to respond: {{ $('Wait for Specialist Review').item.json.$resumeUrl }}</p>",
+        "options": {}
+      }
+    },
+    {
+      "id": "check-specialist-decision",
+      "name": "Check Specialist Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1540, 0],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-approve",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "send-collection-email",
+      "name": "Send Collection Email to Customer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1760, -100],
+      "parameters": {
+        "fromEmail": "ar@company.com",
+        "toEmail": "={{ $json.customerEmail || 'customer@example.com' }}",
+        "subject": "=Payment Reminder — Account {{ $('Prepare Review Notification').item.json.businessPartner }}",
+        "emailType": "text",
+        "message": "={{ $('Prepare Review Notification').item.json.draftEmail }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "log-discarded",
+      "name": "Log Draft Discarded",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1760, 100],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "name": "status",
+              "value": "discarded",
+              "type": "string"
+            },
+            {
+              "name": "businessPartner",
+              "value": "={{ $('Prepare Review Notification').item.json.businessPartner }}",
+              "type": "string"
+            },
+            {
+              "name": "reason",
+              "value": "Specialist discarded the email draft",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "increment-attempt-counter",
+      "name": "Increment Attempt Counter",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1980, -100],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "name": "collectionAttemptCount",
+              "value": "={{ $('Prepare Review Notification').item.json.collectionAttemptCount + 1 }}",
+              "type": "number"
+            },
+            {
+              "name": "businessPartner",
+              "value": "={{ $('Prepare Review Notification').item.json.businessPartner }}",
+              "type": "string"
+            },
+            {
+              "name": "dunningBalance",
+              "value": "={{ $('Prepare Review Notification').item.json.dunningBalance }}",
+              "type": "string"
+            },
+            {
+              "name": "currency",
+              "value": "={{ $('Prepare Review Notification').item.json.currency }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "check-escalation-threshold",
+      "name": "Check Escalation Threshold",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [2200, -100],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-escalate",
+              "leftValue": "={{ $json.collectionAttemptCount }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "escalate-to-manager",
+      "name": "Escalate to AR Manager",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [2420, -200],
+      "parameters": {
+        "fromEmail": "ar-system@company.com",
+        "toEmail": "ar-manager@company.com",
+        "subject": "=[Escalation] Unresolved Overdue Account — {{ $json.businessPartner }}",
+        "emailType": "html",
+        "message": "=<p><strong>ESCALATION: Unresolved Overdue Account</strong></p><p><strong>Business Partner:</strong> {{ $json.businessPartner }}<br><strong>Outstanding Balance:</strong> {{ $json.dunningBalance }} {{ $json.currency }}<br><strong>Collection Attempts Made:</strong> {{ $json.collectionAttemptCount }}</p><p>This account has not responded after {{ $json.collectionAttemptCount }} collection attempts and requires management intervention.</p><p>Please review and take appropriate action.</p>",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Daily Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Overdue Dunning Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Overdue Dunning Records": {
+      "main": [
+        [
+          {
+            "node": "Extract Dunning Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Dunning Records": {
+      "main": [
+        [
+          {
+            "node": "Process Each Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Each Customer": {
+      "main": [
+        [
+          {
+            "node": "Invoke Collection Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoke Collection Email Agent": {
+      "main": [
+        [
+          {
+            "node": "Prepare Review Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Review Notification": {
+      "main": [
+        [
+          {
+            "node": "Notify Specialist of Draft",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait for Specialist Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Specialist Review": {
+      "main": [
+        [
+          {
+            "node": "Check Specialist Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Specialist Decision": {
+      "main": [
+        [
+          {
+            "node": "Send Collection Email to Customer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Draft Discarded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Collection Email to Customer": {
+      "main": [
+        [
+          {
+            "node": "Increment Attempt Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Attempt Counter": {
+      "main": [
+        [
+          {
+            "node": "Check Escalation Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Escalation Threshold": {
+      "main": [
+        [
+          {
+            "node": "Escalate to AR Manager",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
