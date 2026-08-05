@@ -14,22 +14,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Joule Studio CLI
-        uses: github.com/SAP/lifecycle-operation-actions-for-joule-studio/actions/setup-jl
+        uses: SAP/lifecycle-operation-actions-for-joule-studio/actions/setup-jl
 
       - name: Fetch SCI token
         id: fetch-token
-        uses: github.com/SAP/lifecycle-operation-actions-for-joule-studio/actions/token-fetch@main
+        uses: SAP/lifecycle-operation-actions-for-joule-studio/actions/token-fetch@main
         with:
           sciTenantUrl: ${{ vars.SCI_TENANT_URL }}
           sciClientId: ${{ vars.SCI_CLIENT_ID }}
 
       - name: Build solution
         id: zip-solution
-        uses: github.com/SAP/lifecycle-operation-actions-for-joule-studio/actions/build@main
+        uses: SAP/lifecycle-operation-actions-for-joule-studio/actions/build@main
 
 
       - name: Deploy solution
-        uses: github.com/SAP/lifecycle-operation-actions-for-joule-studio/actions/deploy@main
+        uses: SAP/lifecycle-operation-actions-for-joule-studio/actions/deploy@main
         with:
           sciToken: ${{ steps.fetch-token.outputs.sciToken }}
           jouleStudioUrl: ${{ vars.JOULE_STUDIO_URL }}
